@@ -2,18 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-class Term:
-    """
-    Represents a fuzzy term with membership values.
-
-    Attributes:
-        values (numpy.ndarray): Array of membership values for each point in the fuzzy set.
-    """
-
-    def __init__(self, values):
-        self.values = values
-
-
 class Fuzzy:
     """
     Represents a fuzzy set with multiple terms.
@@ -60,8 +48,9 @@ class Fuzzy:
         """
         vals = np.zeros(self.n)
         x = int(x / self.step)
-        for i in range(0, self.n):
-            vals[i] = self.Y[i][x]
+        if x <= self.x_size:
+            for i in range(0, self.n):
+                vals[i] = self.Y[i][x]
         return vals
 
     def add_term(self, term, name, color):
@@ -272,23 +261,29 @@ class Fuzzy:
         return new_set
 
 
-# Usage example
-fuzzy_set = Fuzzy(100, 0.1, 3, "Example Fuzzy Set")
+# Create input fuzzy set
+input_set = Fuzzy(x_size=100, step=.5, n=3, name='input')
 
-# Create terms
-term1 = fuzzy_set.create_singleton(30)
-term2 = fuzzy_set.create_triangle(20, 40, 60)
-term3 = fuzzy_set.create_gaussian(70, 10)
+A = input_set.create_trapezoid(0, 0, 20, 30)
+B = input_set.create_triangle(20, 30, 40)
+C = input_set.create_trapezoid(30, 40, 50, 50)
 
-# Add terms to fuzzy set
-fuzzy_set.add_term(term1, "Singleton", "red")
-fuzzy_set.add_term(term2, "Triangle", "green")
-fuzzy_set.add_term(term3, "Gaussian", "blue")
+input_set.add_term(A, "A", "red")
+input_set.add_term(B, "B", "blue")
+input_set.add_term(C, "C", "green")
 
-# Draw all fuzzy terms
-fuzzy_set.draw_all_fuzzy_sets()
+# create output fuzzy set
+output_set = Fuzzy(100, 1, 3, 'output')
+D = output_set.create_triangle(0, 0, 50)
+E = output_set.create_triangle(20, 60, 80)
+F = output_set.create_triangle(60, 100, 100)
 
-# Get membership values for a specific x value
-x_value = 35
-values = fuzzy_set.get_values(x_value)
-print("Membership values for x =", x_value, ":", values)
+output_set.add_term(D, "D", "red")
+output_set.add_term(E, "E", "blue")
+output_set.add_term(F, "F", "green")
+
+input_val = 33
+
+clipped_set = output_set.clip_set(input_set.get_values(input_val))
+summed_set = output_set.sum_all_terms()
+summed_set.draw_fuzzy_set(0)
